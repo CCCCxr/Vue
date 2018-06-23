@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div id="app">
+		<ele :show="show"></ele>	
+		<button @click="show = !show">btn</button>
+		<br>
+		<ele2 :list="list"></ele2>
+		<br>
+		<ele3 :list="list"></ele3>
+		<button @click="handleClick">btn</button>
+		<br>
+		<ele4></ele4>
+		<br>
+		<ele5></ele5>
+	
+		<br>
+		<ele6></ele6>
+		<ele6>
+			<p>slot的内容</p>
+		</ele6>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+	<script>
+		// 在Render函数中，不在需要Vue内置的指令，比如v-if,v-for，当然也没办法使用，无论使用
+		// 什么功能，都可以用原生的JavaScript，比如v-if和v-eles 可以这样写
+		Vue.component('ele',{
+			render(createElement){
+				if (this.show) {
+					return createElement("p","show的值为true")
+				} else {
+					return createElement("p","show的值为false")
+				}
+			},
+			props:{
+				show:{
+					type:Boolean,
+					default:false
+				}
+			}
+		})
+		// for则可以使用一个简单的for循环来实现
+		Vue.component("ele2",{
+			render(createElement){
+				let nodes = [];
+				for (let i = 0; i < this.list.length; i++) {
+					nodes.push(createElement("p",this.list[i]))
+				}
+				return createElement("div",nodes);
+			},
+			props:{
+				list:Array
+			}
+		})
+
+		// 实现可以使用if,else语句和map方法来渲染一个列表
+		Vue.component("ele3",{
+			render(createElement){
+				if (this.list.length) {
+					return createElement("ul",this.list.map( item => {
+						return createElement("li",item)
+					}))
+				} else {
+					return createElement("p","列表为空")
+				}
+			},
+			props:{
+				list:{
+					type:Array,
+					default(){
+						return [];
+					}
+				}
+			}
+		})
+
+		// Render函数里也没有v-model对应的API，需要自己来实现逻辑。
+		// 事实上，v-model就是prop:value和event:input 组合的一个语法糖。
+		Vue.component("ele4",{
+			render(createElement){
+				let _this = this;
+				return createElement('div',[
+					createElement('input',{
+						domProps:{
+							value:this.value
+						},
+						on:{
+							input(event) {
+								_this.value = event.target.value;
+							}
+						}
+					}),
+					createElement("p",'value:' + this.value)
+				])
+			},
+			data(){
+				return {
+					value:""
+				}
+			}
+		})
+
+		// 简单模拟一个聊天发送内容的场景
+		Vue.component('ele5',{
+			render(createElement){
+				let _this = this;
+				let listNode;
+				if (this.list.length) {
+					listNode = createElement("ul",this.list.map(function (item) {
+						return createElement("li",item);
+					}))
+				} else {
+					listNode = createElement('p','暂无聊天内容')
+				}
+				return createElement('div',[
+					listNode,
+					createElement('input',{
+						attrs:{
+							placeholder:"输入内容，按回车键发送"
+						},
+						style:{
+							width:'200px'
+						},
+						on:{
+							keyup(event){
+								if (event.keyCode !== 13) return;
+								_this.list.push(event.target.value);
+								event.target.value = "";
+							}
+						}
+					})
+				])
+			},
+			data(){
+				return  {
+					value:"",
+					list:[]
+				}
+			}
+		})
+
+		// 对于slot，我们可以使用this.$slots来访问。不过没有slot时，会显示一个默认的内容。这部分需要我们自己实现。
+		//this.$slots.default === undefined 就说明父组件中没有定义slot，这是可以定义显示的内容。
+		Vue.component('ele6',{
+			render(createElement){
+				if (this.$slots.default === undefined) {
+					return createElement('div','没有使用slot时显示的文本');
+				} else {
+					return createElement('div',this.$slots.default);
+				}
+			}
+		})
+
+		let app = new Vue({
+			el:"#app",
+			data:{
+				show:false,
+				list:[]
+			},
+			methods:{
+				handleClick(){
+					this.list = [
+						"Vue.js 实战",
+						"JavaScript高级程序设计",
+						"JavaScript 语言精粹"
+					]
+				}
+			}
+		})
+
+	</script>
+</body>
+</html>

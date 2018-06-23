@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="app" v-cloak>
+		<ul>
+			<li v-for="book in books">{{book.name}}</li>
+		</ul>
+		<ul>
+			<li v-for="book of books">{{book.name}}</li>
+		</ul>
+		<ul>
+			<li v-for="(book,index) in books">{{index}} - {{book.name}}</li>
+		</ul>
+		<ul>
+			<template v-for="book in books2">
+				<li>书名：{{book.name}}</li>
+				<li>作者：{{book.author}}</li>
+			</template>
+		</ul>
+		<span v-for="value in user">{{value}}</span>
+		<ul>
+			<li v-for="(value,key,index) in user">
+				{{index}} - {{key}}:{{value}}
+			</li>
+		</ul>
+		<hr>
+		<ul>
+			<template v-for="book in filterBooks">
+				<li>书名:{{book.name}}</li>
+			</template>
+		</ul>
+		<hr>
+		<ul>
+			<template v-for="book in sortedBooks">
+				<li>书名:{{book.name}}</li>
+			</template>
+		</ul>
+	</div>
+	<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.min.js"></script>
+	<script>
+		// 列表渲染指令
+		// 当需要将一个数组遍历或枚举一个对象循环显示时，就会用到列表渲染指令v-for。它的表达式结合in来使用
+		// 类似于item in item的形式。
+		/*
+			表达式中，books是数据，book是当前数组元素的别名，循环出的Li元素都可以访问到对应当前的数据book。
+			也可以使用of来代替in作为分隔符。
+			v-for的表达式支持一个可选参数作为当前项的索引 
+		*/
+
+		// v-for 也可以用再内置标签<template> 
+		// 除了数组外，对象的属性也是可以遍历的,遍历对象时有俩个可选参数，分别是索引和键名
+		let app = new Vue({
+			el:"#app",
+			data:{
+				books:[
+					{name:"Vue.js实战"},
+					{name:"JavaScript语言精粹"},
+					{name:"JavaScript高级程序设计"}
+				],
+				books2:[
+					{name:"Vue.js实战",author:"1"},
+					{name:"JavaScript语言精粹",author:"2"},
+					{name:"JavaScript高级程序设计",author:"3 "}
+				],
+				user:{
+					name:"陈",
+					gender:"男",
+					age:24
+				}
+			},
+			computed:{
+				filterBooks:function(){
+					return this.books2.filter((book) => {
+						return book.name.match(/JavaScript/)
+					})
+				},
+				sortedBooks(){
+					return this.books2.sort((a,b) =>{
+						return a.name.length < b.name.length
+					})
+				}
+			}
+		})
+
+		// Vue的核心是数据与视图的双向绑定，当修改数组的时候,Vue会检测到数据变化，相应的视图也会立即更新.
+		// Vue包含了一组观察数组变异的方法(也就是会改变原数组的方法),它们改变数组也会触发视图更新。
+		app.books.push({
+			name:"CSS",
+			author:"4"
+		})
+		// 但是还有一些非变异方法，它们返回的是一个新的数组，之后替换掉原来数组
+		app.books = app.books.filter(function(item) {
+			return item.name.match(/JavaScript/);
+		});  
+
+		// 需要注意的是 以下变动是不会被检测到，也不会触发视图更新
+		//app.books[3] = {...};   通过索引直接设置项
+		//app.books.length = 1;   修改数组长度
+
+		// 如果需要用到上面的话，第一个问题可以使用Vue内置的set方法。
+		Vue.set(app.books,1,{
+			name:'css',
+			author:"3"
+		})
+		//  还可以使用splice解决
+		app.books.splice(1,1,{
+			name:"css揭秘",
+			author:"1"
+		});
+
+		// 过滤与排序 
+		// 如果不想改变原数组，想通过一个数组的副本来做过滤或排序的显示时，可以使用计算属性
+
+	</script>
+</body>
+</html>

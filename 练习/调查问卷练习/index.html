@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		[v-cloak] {
+			display: none;
+		}
+		.container{
+			font-size:14px;
+			color:#4c4c4c;
+			width: 350px;
+			height: 550px;
+			border:1px solid black;
+		}
+		.button-items{
+			margin-top: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div id="app" v-cloak>
+		<div class="container">
+			<div class="first" v-show="page == 1">
+				<p>1.请问你的性别是：</p>
+				<input id="nan" type="radio" name="sex" value="nan" v-model="sex">
+				<label for="nan">男</label>
+				<input id="nv" type="radio" name="sex" value="nv" v-model="sex">
+				<label for="nan">女</label>
+				<input id="baomi" type="radio" name="sex" value="baomi" v-model="sex">
+				<label for="baomi">保密</label>
+			</div>
+			<div class="second" v-show="page == 2">
+				<p>2.请问你的兴趣爱好</p>
+				<input type="checkbox" name="hobby" value="game" id="game" v-model="hobby">
+				<label for="game">游戏</label>
+				<input type="checkbox" name="hobby" value="book" id="book" v-model="hobby">
+				<label for="book">书籍</label>
+				<input type="checkbox" name="hobby" value="music" id="music" v-model="hobby">
+				<label for="music">音乐</label>
+				<input type="checkbox" name="hobby" value="sport" id="sport" v-model="hobby">
+				<label for="sport">运动</label>
+			</div>
+			<div class="Third" v-show="page == 3">
+				<p>3.请做个自我介绍，不少于100字</p>
+				<textarea v-model="introduce">
+					
+				</textarea>
+			</div>
+			<button-items :btn="btnStatus"  @next="next" @prve="prve" ></button-items>
+		</div>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+	<script type="text/javascript">
+		Vue.component('button-items',{
+			props:["btn"],
+			template:`
+				<div class="button-items">
+					<button>重置</button>
+					<button v-show="up" @click="upPage">上一步</button>
+					<button @click="nextPage" :disabled="btn">{{btntext}}</button>
+					<p>{{btn}}</p>
+				</div>
+			`,
+			data(){
+				return {
+					up:false,
+					page:1,
+					disabled:this.btn,
+					btntext:"下一步"
+				}
+			},
+			methods:{
+				nextPage(){
+					this.page++;
+					if (this.page >= 2 && this.page <= 3) {
+						this.up = true
+					}
+					if (this.page == 3) {
+						this.btntext = "提交"
+					}
+					this.$emit('next',this.page);
+				},
+
+				upPage(){
+					this.page--;
+					if (this.page == 1) {
+						this.up = false
+					} 
+					this.disabled = false
+					this.$emit('prve',this.page);
+				}
+			}
+		})
+
+		let app = new Vue({
+			el:"#app",
+			data:{
+				sex:"",
+				introduce:"",
+				hobby:[],
+				page:1,
+				btnStatus:true
+			},
+			methods:{
+				next(page){
+					this.page = page;
+					this.btnStatus = true;
+				},
+				prve(page){  
+					this.page = page
+				}
+			},
+			watch:{
+				sex(){
+					this.btnStatus = false;
+				},
+				hobby(){
+					if (this.hobby.length === 2) {
+						this.btnStatus = false;
+					}
+				},
+				introduce(){
+					if (this.introduce.length >= 100) {
+						this.btnStatus = false;
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>
